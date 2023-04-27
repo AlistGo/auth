@@ -78,7 +78,7 @@ func aliAccessToken(c *gin.Context) {
 		return
 	}
 	var e AliAccessTokenErr
-	res, err := utils.RestyClient.R().SetBody(req).SetError(&e).Post("https://open.aliyundrive.com/oauth/access_token")
+	res, err := utils.RestyClient.R().SetBody(req).SetError(&e).Post("https://openapi.aliyundrive.com/oauth/access_token")
 	if err != nil {
 		common.ErrorJson(c, AliAccessTokenErr{
 			Code:    "InternalError",
@@ -120,7 +120,7 @@ func aliQrcode(c *gin.Context) {
 		req.Scopes = []string{"user:base", "file:all:read", "file:all:write"}
 	}
 	var e AliAccessTokenErr
-	res, err := utils.RestyClient.R().SetBody(req).SetError(&e).Post("https://open.aliyundrive.com/oauth/authorize/qrcode")
+	res, err := utils.RestyClient.R().SetBody(req).SetError(&e).Post("https://openapi.aliyundrive.com/oauth/authorize/qrcode")
 	if err != nil {
 		c.JSON(500, AliAccessTokenErr{
 			Code:    "InternalError",
