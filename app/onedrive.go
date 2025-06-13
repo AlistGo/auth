@@ -1,12 +1,10 @@
-package alist
+package app
 
 import (
 	"encoding/base64"
 	"net/url"
 	"strings"
 
-	"api.nn.ci/apps/common"
-	"api.nn.ci/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,21 +39,21 @@ func onedriveToken(c *gin.Context) {
 	}{}
 	err := c.ShouldBind(&req)
 	if err != nil {
-		common.Error(c, err)
+		Error(c, err)
 		return
 	}
 	data, err := base64.StdEncoding.DecodeString(req.Client)
 	if err != nil {
-		common.Error(c, err)
+		Error(c, err)
 		return
 	}
 	clients := strings.Split(string(data), "::")
 	if len(clients) < 3 {
-		common.ErrorStr(c, "client error")
+		ErrorStr(c, "client error")
 		return
 	}
 	if zone, ok := zones[clients[2]]; ok {
-		res, err := utils.RestyClient.R().
+		res, err := RestyClient.R().
 			SetFormData(map[string]string{
 				"client_id":     clients[0],
 				"client_secret": clients[1],
@@ -65,13 +63,13 @@ func onedriveToken(c *gin.Context) {
 			}).
 			Post(zone.Oauth + "/common/oauth2/v2.0/token")
 		if err != nil {
-			common.Error(c, err)
+			Error(c, err)
 			return
 		}
-		common.JsonBytes(c, res.Body())
+		JsonBytes(c, res.Bytes())
 		return
 	}
-	common.ErrorStr(c, "zone doesn't exist")
+	ErrorStr(c, "zone doesn't exist")
 	return
 }
 
@@ -83,26 +81,26 @@ func spSiteID(c *gin.Context) {
 	}{}
 	err := c.ShouldBind(&req)
 	if err != nil {
-		common.Error(c, err)
+		Error(c, err)
 		return
 	}
 	u, err := url.Parse(req.SiteUrl)
 	if err != nil {
-		common.Error(c, err)
+		Error(c, err)
 		return
 	}
 	siteName := u.Path
 	if zone, ok := zones[req.Zone]; ok {
-		res, err := utils.RestyClient.R().
+		res, err := RestyClient.R().
 			SetHeader("Authorization", "Bearer "+req.AccessToken).
 			Get(zone.Api + "/v1.0/sites/root:/" + siteName)
 		if err != nil {
-			common.Error(c, err)
+			Error(c, err)
 			return
 		}
-		common.JsonBytes(c, res.Body())
+		JsonBytes(c, res.Bytes())
 		return
 	}
-	common.ErrorStr(c, "zone doesn't exist")
+	ErrorStr(c, "zone doesn't exist")
 	return
 }
